@@ -687,7 +687,8 @@ static NSString*    const kAppWillEnterForegroundTimeKey    = @"APCWillEnterFore
 
 - (NSURL *)appStoreLinkURL
 {
-    return [[NSBundle mainBundle] appStoreLinkURL];
+    return [NSURL URLWithString:@""];
+//    return [[NSBundle mainBundle] appStoreLinkURL];
 }
 
 /*********************************************************************************/
@@ -1155,7 +1156,12 @@ static NSString*    const kAppWillEnterForegroundTimeKey    = @"APCWillEnterFore
     [self passcodeViewControllerDidFail];
 }
 
-- (void)passcodeViewControllerForgotPasscode:(UIViewController *) __unused viewController
+- (BOOL) hasForgotPasscode
+{
+    return YES;
+}
+
+- (void) forgotPasscodeTapped:(__unused UIButton *)forgotPasscodeButton
 {
     [self showResetPasscodeAlert:nil];
 }

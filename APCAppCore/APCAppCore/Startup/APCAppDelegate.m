@@ -1162,6 +1162,7 @@ static NSString*    const kAppWillEnterForegroundTimeKey    = @"APCWillEnterFore
 }
 
 - (void) forgotPasscodeTapped:(__unused UIButton *)forgotPasscodeButton
+             onViewController:(__unused UIViewController *)viewController
 {
     [self showResetPasscodeAlert:nil];
 }
@@ -1194,10 +1195,7 @@ static NSString*    const kAppWillEnterForegroundTimeKey    = @"APCWillEnterFore
     NSString* cancelTitle = [NSLocalizedStringWithDefaultValue(@"cancel", @"APCAppCore", APCBundle(), @"cancel", @"Action to cancel") uppercaseString];
     UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:cancelTitle
                                                            style:UIAlertActionStyleDefault
-                                                         handler:^(__unused UIAlertAction * _Nonnull action)
-                                   {
-                                       // TODO: hiddenTextView becomeFirstResponder
-                                   }];
+                                                         handler:^(__unused UIAlertAction * _Nonnull action){}];
     [alert addAction:cancelAction];
     
     NSString* logoutTitle = [NSLocalizedStringWithDefaultValue(@"log out", @"APCAppCore", APCBundle(), @"log out", @"Action to log out") uppercaseString];

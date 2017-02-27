@@ -54,7 +54,7 @@ static NSString *const kPasswordPropertyName = @"password";
 static NSString *const kSessionTokenPropertyName = @"sessionToken";
 static NSString *const kExternalIdPropertyName = @"externalId";
 static NSString *const kHeightPropertyName = @"heightMeters";
-static NSString *const kWeightPropertyName = @"weightKilograms";
+static NSString *const kWeightPropertyName = @"weightGrams";
 
 static NSString *const kSharedOptionSelection = @"sharedOptionSelection";
 static NSString *const kTaskCompletion = @"taskCompletion";

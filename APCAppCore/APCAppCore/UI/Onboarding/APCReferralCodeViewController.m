@@ -34,6 +34,7 @@ static const NSString *kTextFieldDelimiterString = @"-";
 
 static const NSUInteger kErrorCodeReferralCodeInvalid = 404;
 static const NSUInteger kErrorCodeReferralCodeAlreadyUsed = 409;
+static const NSUInteger kErrorCodeCannotChange = 400;
 
 @implementation APCReferralCodeViewController
 
@@ -257,6 +258,17 @@ static const NSUInteger kErrorCodeReferralCodeAlreadyUsed = 409;
     return valid;
 }
 
+- (BOOL)codeIsEmpty {
+    BOOL empty = YES;
+    for (APCReferralCodeTextField *textField in self.textFields) {
+        if (textField.text.length > 0) {
+            empty = NO;
+        }
+    }
+    
+    return empty;
+}
+
 - (void)updateControls {
     self.saveButton.enabled = [self codeIsValid] || [self concatStringWithDelimiter:NO].length == 0;
 }
@@ -279,91 +291,107 @@ static const NSUInteger kErrorCodeReferralCodeAlreadyUsed = 409;
     [self goForward];
      */
 
+    if (![self codeIsEmpty]) {
     
-    
-    self.saveButton.enabled = NO;
-    
-    [self resignFirstResponderOnAll];
-    
-    APCSpinnerViewController *spinnerController = [[APCSpinnerViewController alloc] init];
-    [self presentViewController:spinnerController animated:YES completion:nil];
-    
-    // post code to server
+        self.saveButton.enabled = NO;
+        
+        [self resignFirstResponderOnAll];
+        
+        APCSpinnerViewController *spinnerController = [[APCSpinnerViewController alloc] init];
+        [self presentViewController:spinnerController animated:YES completion:nil];
+        
+        // post code to server
 
-    typeof(self) __weak weakSelf = self;
-    [SBBComponent(SBBParticipantManager) setExternalIdentifier:[self finalString] completion:^(id  _Nullable responseObject __unused, NSError * _Nullable error) {
-        
-        
-        // get back to main thread
-        dispatch_async(dispatch_get_main_queue(), ^{
+        typeof(self) __weak weakSelf = self;
+        [SBBComponent(SBBParticipantManager) setExternalIdentifier:[self finalString] completion:^(id  _Nullable responseObject __unused, NSError * _Nullable error) {
             
-            if (error) {
+            
+            // get back to main thread
+            dispatch_async(dispatch_get_main_queue(), ^{
                 
-                weakSelf.saveButton.enabled = YES;
-                
-                APCLogError2 (error);
-                
-                if (error.code == SBBErrorCodeInternetNotConnected || error.code == SBBErrorCodeServerNotReachable || error.code == SBBErrorCodeServerUnderMaintenance) {
-                    [spinnerController dismissViewControllerAnimated:NO completion:^{
-                        
-                        UIAlertController *alertView = [UIAlertController alertControllerWithTitle:NSLocalizedStringWithDefaultValue(@"Referral Code", @"APCAppCore", APCBundle(), @"Referral Code", @"")
-                                                                                           message:error.localizedDescription
-                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                        
-                        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-                                                                              handler:^(UIAlertAction * __unused action) {}];
-                        
-                        [alertView addAction:defaultAction];
-                        [weakSelf presentViewController:alertView animated:YES completion:nil];
-                    }];
+                if (error) {
+                    
+                    weakSelf.saveButton.enabled = YES;
+                    
+                    APCLogError2 (error);
+                    
+                    if (error.code == SBBErrorCodeInternetNotConnected || error.code == SBBErrorCodeServerNotReachable || error.code == SBBErrorCodeServerUnderMaintenance) {
+                        [spinnerController dismissViewControllerAnimated:NO completion:^{
+                            
+                            UIAlertController *alertView = [UIAlertController alertControllerWithTitle:NSLocalizedStringWithDefaultValue(@"Referral Code", @"APCAppCore", APCBundle(), @"Referral Code", @"")
+                                                                                               message:error.localizedDescription
+                                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                            
+                            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                                                  handler:^(UIAlertAction * __unused action) {}];
+                            
+                            [alertView addAction:defaultAction];
+                            [weakSelf presentViewController:alertView animated:YES completion:nil];
+                        }];
+                    }
+                    else if (error.code == kErrorCodeReferralCodeInvalid || error.code == kErrorCodeReferralCodeAlreadyUsed) {
+                        [spinnerController dismissViewControllerAnimated:NO completion:^{
+                            
+                            UIAlertController *alertView = [UIAlertController alertControllerWithTitle:nil
+                                                                                               message:NSLocalizedStringWithDefaultValue(@"Invalid referral code. Please try again.", @"APCAppCore", APCBundle(), @"Invalid referral code. Please try again.", @"")
+                                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                            
+                            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                                                  handler:^(UIAlertAction * __unused action) {}];
+                            
+                            [alertView addAction:defaultAction];
+                            [weakSelf presentViewController:alertView animated:YES completion:nil];
+                        }];
+                    } else if (error.code == kErrorCodeCannotChange) {
+                        [spinnerController dismissViewControllerAnimated:NO completion:^{
+                            
+                            UIAlertController *alertView = [UIAlertController alertControllerWithTitle:nil
+                                                                                               message:NSLocalizedStringWithDefaultValue(@"A referral code has already been assigned to this account, please contact customer support with questions.", @"APCAppCore", APCBundle(), @"A referral code has already been assigned to this account, please contact customer support with questions.", @"")
+                                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                            
+                            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                                                  handler:^(UIAlertAction * __unused action) {}];
+                            
+                            [alertView addAction:defaultAction];
+                            [weakSelf presentViewController:alertView animated:YES completion:nil];
+                        }];
+                    }
+                    else {
+                        [spinnerController dismissViewControllerAnimated:NO completion:^{
+                            
+                            UIAlertController *alertView = [UIAlertController alertControllerWithTitle:NSLocalizedStringWithDefaultValue(@"Referral Code", @"APCAppCore", APCBundle(), @"Referral Code", @"")
+                                                                                               message:error.message
+                                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                            
+                            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringWithDefaultValue(@"Cancel", @"APCAppCore", APCBundle(), @"Cancel", @"") style:UIAlertActionStyleCancel
+                                                                                 handler:^(UIAlertAction * __unused action) {
+                                                                                     // nothing
+                                                                                 }];
+                            
+                            UIAlertAction* retryAction = [UIAlertAction actionWithTitle:NSLocalizedStringWithDefaultValue(@"Try Again", @"APCAppCore", APCBundle(), @"Try Again", nil) style:UIAlertActionStyleDefault
+                                                                                handler:^(UIAlertAction * __unused action) {
+                                                                                    [weakSelf saveHit:nil];
+                                                                                }];
+                            
+                            [alertView addAction:cancelAction];
+                            [alertView addAction:retryAction];
+                            [weakSelf presentViewController:alertView animated:YES completion:nil];
+                            
+                        }];
+                    }
                 }
-                else if (error.code == kErrorCodeReferralCodeInvalid || error.code == kErrorCodeReferralCodeAlreadyUsed) {
-                    [spinnerController dismissViewControllerAnimated:NO completion:^{
-                        
-                        UIAlertController *alertView = [UIAlertController alertControllerWithTitle:nil
-                                                                                           message:NSLocalizedStringWithDefaultValue(@"Invalid referral code. Please try again.", @"APCAppCore", APCBundle(), @"Invalid referral code. Please try again.", @"")
-                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                        
-                        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-                                                                              handler:^(UIAlertAction * __unused action) {}];
-                        
-                        [alertView addAction:defaultAction];
-                        [weakSelf presentViewController:alertView animated:YES completion:nil];
-                    }];
+                else
+                {
+                    
+                    // save our new referral code to current user
+                    [weakSelf currentUser].externalId = [weakSelf finalString];
+                    [weakSelf saveSucceededWithSpinnerController:spinnerController];
                 }
-                else {
-                    [spinnerController dismissViewControllerAnimated:NO completion:^{
-                        
-                        UIAlertController *alertView = [UIAlertController alertControllerWithTitle:NSLocalizedStringWithDefaultValue(@"Referral Code", @"APCAppCore", APCBundle(), @"Referral Code", @"")
-                                                                                           message:error.message
-                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                        
-                        UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringWithDefaultValue(@"Cancel", @"APCAppCore", APCBundle(), @"Cancel", @"") style:UIAlertActionStyleCancel
-                                                                             handler:^(UIAlertAction * __unused action) {
-                                                                                 // nothing
-                                                                             }];
-                        
-                        UIAlertAction* retryAction = [UIAlertAction actionWithTitle:NSLocalizedStringWithDefaultValue(@"Try Again", @"APCAppCore", APCBundle(), @"Try Again", nil) style:UIAlertActionStyleDefault
-                                                                            handler:^(UIAlertAction * __unused action) {
-                                                                                [weakSelf saveHit:nil];
-                                                                            }];
-                        
-                        [alertView addAction:cancelAction];
-                        [alertView addAction:retryAction];
-                        [weakSelf presentViewController:alertView animated:YES completion:nil];
-                        
-                    }];
-                }
-            }
-            else
-            {
-                
-                // save our new referral code to current user
-                [weakSelf currentUser].externalId = [weakSelf finalString];
-                [weakSelf saveSucceededWithSpinnerController:spinnerController];
-            }
-        });
-    }];
+            });
+        }];
+    } else {
+        [self goForward];
+    }
 }
 
 - (void)goForward {

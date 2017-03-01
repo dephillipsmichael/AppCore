@@ -53,6 +53,8 @@ static NSString *const kEmailPropertyName = @"email";
 static NSString *const kPasswordPropertyName = @"password";
 static NSString *const kSessionTokenPropertyName = @"sessionToken";
 static NSString *const kExternalIdPropertyName = @"externalId";
+static NSString *const kHeightPropertyName = @"heightMeters";
+static NSString *const kWeightPropertyName = @"weightGrams";
 
 static NSString *const kSharedOptionSelection = @"sharedOptionSelection";
 static NSString *const kTaskCompletion = @"taskCompletion";
@@ -359,6 +361,75 @@ static NSString *const kSignedInKey = @"SignedIn";
     [APCKeychainStore setString:subpopulationGuid forKey:kSavedSubpopulationGuidKey];
 }
 
+//Height
+- (HKQuantity *)height
+{
+    NSString *heightString = [APCKeychainStore stringForKey:kHeightPropertyName];
+    HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
+    if (!heightString) {
+        // Not currently stored, so try to pull a default value from HealthKit
+        dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+        __block HKQuantity * height;
+        [self.healthStore mostRecentQuantitySampleOfType:heightType predicate:nil completion:^(HKQuantity *mostRecentQuantity, NSError *error) {
+            APCLogError2 (error);
+            height = mostRecentQuantity;
+            dispatch_semaphore_signal(sema);
+        }];
+        
+        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        
+        sema = NULL;
+        return height;
+    } else {
+        // Something was stored, so convert it to an HKQuantity and return it
+        double heightDouble = [heightString doubleValue];
+        HKQuantity *height = [HKQuantity quantityWithUnit:[HKUnit meterUnit] doubleValue:heightDouble];
+        return height;
+    }
+}
+
+- (void)setHeight:(HKQuantity *)height
+{
+    double heightDouble = [height doubleValueForUnit:[HKUnit meterUnit]];
+    NSString *heightString = [NSString stringWithFormat:@"%lf", heightDouble];
+    [APCKeychainStore setString:heightString forKey:kHeightPropertyName];
+}
+
+//Weight
+- (HKQuantity *)weight
+{
+    NSString *weightString = [APCKeychainStore stringForKey:kWeightPropertyName];
+    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
+    if (!weightString) {
+        // Not currently stored, so try to pull a default value from HealthKit
+        dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+        __block HKQuantity * weight;
+        [self.healthStore mostRecentQuantitySampleOfType:weightType predicate:nil completion:^(HKQuantity *mostRecentQuantity, NSError *error) {
+            APCLogError2 (error);
+            weight = mostRecentQuantity;
+            dispatch_semaphore_signal(sema);
+        }];
+        
+        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        
+        sema = NULL;
+        return weight;
+    } else {
+        // Something was stored, so convert it to an HKQuantity and return it
+        double weightDouble = [weightString doubleValue];
+        HKQuantity *weight = [HKQuantity quantityWithUnit:[HKUnit gramUnit] doubleValue:weightDouble];
+        return weight;
+    }
+    
+}
+
+- (void)setWeight:(HKQuantity *)weight
+{
+    double weightDouble = [weight doubleValueForUnit:[HKUnit gramUnit]];
+    NSString *weightString = [NSString stringWithFormat:@"%lf", weightDouble];
+    [APCKeychainStore setString:weightString forKey:kWeightPropertyName];
+}
+
 
 /*********************************************************************************/
 #pragma mark - Setters for Properties in Core Data
@@ -600,71 +671,6 @@ static NSString *const kSignedInKey = @"SignedIn";
 {
     _bloodType = bloodType;
     [self updateStoredProperty:kBloodTypePropertyName withValue:@(bloodType)];
-}
-
-//Height
-- (HKQuantity *)height
-{
-    
-    HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    __block HKQuantity * height;
-    [self.healthStore mostRecentQuantitySampleOfType:heightType predicate:nil completion:^(HKQuantity *mostRecentQuantity, NSError *error) {
-        APCLogError2 (error);
-        height = mostRecentQuantity;
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-    
-    sema = NULL;
-    return height;
-    
-}
-
-- (void)setHeight:(HKQuantity *)height
-{
-    
-    HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
-    NSDate *now = [NSDate date];
-    
-    HKQuantitySample *heightSample = [HKQuantitySample quantitySampleWithType:heightType quantity:height startDate:now endDate:now];
-    
-    [self.healthStore saveObject:heightSample withCompletion:^(BOOL __unused success, NSError *error) {
-        APCLogError2 (error);
-    }];
-}
-
-//Weight
-- (HKQuantity *)weight
-{
-    
-    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    __block HKQuantity * weight;
-    [self.healthStore mostRecentQuantitySampleOfType:weightType predicate:nil completion:^(HKQuantity *mostRecentQuantity, NSError *error) {
-        APCLogError2 (error);
-        weight = mostRecentQuantity;
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-    
-    sema = NULL;
-    return weight;
-}
-
-- (void)setWeight:(HKQuantity *)weight
-{
-    
-    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-    NSDate *now = [NSDate date];
-    
-    HKQuantitySample *weightSample = [HKQuantitySample quantitySampleWithType:weightType quantity:weight startDate:now endDate:now];
-    
-    [self.healthStore saveObject:weightSample withCompletion:^(BOOL __unused success, NSError *error) {
-        APCLogError2 (error);
-    }];
 }
 
 // Systolic Blood Pressure

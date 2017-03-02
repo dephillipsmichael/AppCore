@@ -643,6 +643,10 @@ static CGFloat kHeaderHeight = 157.0f;
     [self presentViewController:spinnerController animated:YES completion:nil];
     
     typeof(self) __weak weakSelf = self;
+    // SignUp will error out w/o message for a variety of reasons if an externalId is provided and has any issue,
+    // so make sure it is cleared out before signUp is called. It should generally be clear already but might have
+    // a lingering value from a previous install or other reason.
+    self.user.externalId = nil;
     [self.user signUpWithDataGroups:self.user.dataGroups withTestUserPromptVc:self onCompletion:^(NSError *error) {
         if (error) {
             

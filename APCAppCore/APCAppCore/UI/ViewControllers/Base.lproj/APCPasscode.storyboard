@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="14F1021" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="aU5-mj-CXc">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="aU5-mj-CXc">
+    <device id="retina4_0" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Passcode View Controller-->
@@ -24,12 +28,12 @@
                                     <constraint firstAttribute="height" constant="34" id="eiy-mf-zkC"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aK3-gJ-vS8" customClass="APCPasscodeView">
                                 <rect key="frame" x="70" y="179" width="180" height="64"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="64" id="SXm-f0-KFa"/>
                                     <constraint firstAttribute="width" constant="180" id="pAS-2X-ABg"/>
@@ -49,7 +53,7 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="146" id="uRh-eZ-N5W"/>
                                 </constraints>
                                 <state key="normal" title="Use Touch ID">
-                                    <color key="titleColor" red="0.97254901959999995" green="0.97254901959999995" blue="0.97254901959999995" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleColor" red="0.97254901959999995" green="0.97254901959999995" blue="0.97254901959999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
                                     <action selector="useTouchId:" destination="aU5-mj-CXc" eventType="touchUpInside" id="zfF-v3-edq"/>
@@ -67,19 +71,19 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="cKG-bB-Ib1" firstAttribute="top" secondItem="Cr6-0R-lJe" secondAttribute="bottom" constant="25" id="9c6-8y-rdu"/>
                             <constraint firstItem="Wam-hc-U5h" firstAttribute="leading" secondItem="MAj-Wy-kJa" secondAttribute="leadingMargin" constant="8" id="Hyd-wR-jBL"/>
                             <constraint firstItem="aK3-gJ-vS8" firstAttribute="top" secondItem="cKG-bB-Ib1" secondAttribute="bottom" constant="20" id="ShE-ol-A7j"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Wam-hc-U5h" secondAttribute="trailing" constant="8" id="UBl-5M-Esf"/>
+                            <constraint firstItem="ygh-IW-MBW" firstAttribute="top" secondItem="Wam-hc-U5h" secondAttribute="bottom" constant="18" id="UJX-xe-gsv"/>
                             <constraint firstItem="Wam-hc-U5h" firstAttribute="centerX" secondItem="MAj-Wy-kJa" secondAttribute="centerX" id="Uhj-82-kkM"/>
                             <constraint firstItem="Cr6-0R-lJe" firstAttribute="top" secondItem="445-jw-ZAP" secondAttribute="bottom" constant="30" id="Ulo-o4-xDE"/>
                             <constraint firstItem="cKG-bB-Ib1" firstAttribute="leading" secondItem="MAj-Wy-kJa" secondAttribute="leadingMargin" constant="13" id="VqT-z2-DCt"/>
                             <constraint firstAttribute="centerX" secondItem="aK3-gJ-vS8" secondAttribute="centerX" id="WCk-vE-JxC"/>
                             <constraint firstItem="fZn-Rb-vDa" firstAttribute="top" secondItem="ygh-IW-MBW" secondAttribute="bottom" constant="20" id="aDN-tl-Z7H"/>
                             <constraint firstAttribute="trailing" secondItem="ygh-IW-MBW" secondAttribute="trailing" constant="87" id="bOj-hf-Yga"/>
-                            <constraint firstItem="fZn-Rb-vDa" firstAttribute="top" secondItem="Wam-hc-U5h" secondAttribute="bottom" constant="82" id="d5B-1r-Hhu"/>
                             <constraint firstAttribute="centerX" secondItem="Cr6-0R-lJe" secondAttribute="centerX" id="ilQ-JB-VGR"/>
                             <constraint firstAttribute="centerX" secondItem="ygh-IW-MBW" secondAttribute="centerX" id="pdS-Z8-Kpx"/>
                             <constraint firstAttribute="trailingMargin" secondItem="cKG-bB-Ib1" secondAttribute="trailing" constant="12" id="xlr-kq-iLO"/>
@@ -91,7 +95,6 @@
                             </mask>
                         </variation>
                     </view>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
                         <outlet property="logoImageView" destination="Cr6-0R-lJe" id="aMO-Pd-UVB"/>
                         <outlet property="passcodeView" destination="aK3-gJ-vS8" id="mP1-mH-IYp"/>

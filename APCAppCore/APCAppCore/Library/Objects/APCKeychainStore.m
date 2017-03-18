@@ -102,7 +102,7 @@ static NSString *_defaultService;
         CFTypeRef data = nil;
         OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &data);
         if (status != errSecSuccess) {
-            APCLogDebug(@"SecItemCopyMatching query failed with error code: %lii", status);
+            APCLogDebug(@"SecItemCopyMatching query failed with error code: %i", status);
             return nil;
         }
         

@@ -196,7 +196,7 @@
                           localizedReason:localizedReason
                                     reply:^(BOOL success, NSError __unused *error)
          {
-             dispatch_sync(dispatch_get_main_queue(), ^{
+             dispatch_async(dispatch_get_main_queue(), ^{
                  if (success) {
                      if ([self.passcodeViewControllerDelegate respondsToSelector:@selector(passcodeViewControllerDidSucceed:)]) {
                          [self.passcodeViewControllerDelegate passcodeViewControllerDidSucceed:self];
@@ -210,9 +210,9 @@
                          self.passcodeView.alpha = 1;
                          self.titleLabel.alpha = 1;
                          self.touchIdButton.alpha = 1;
+                     } completion:^(BOOL __unused finished) {
+                         [self makePasscodeViewBecomeFirstResponder];
                      }];
-                     
-                     [self makePasscodeViewBecomeFirstResponder];
                  }
              });
          }];

@@ -346,7 +346,30 @@ NSString * NSStringFromORKTaskViewControllerFinishReason (ORKTaskViewControllerF
     // get a fresh archive
     // Note: by current design this is UI blocking if run on main thread. TODO: move off main thread? syoung 12/11/2015
     self.archive = [[APCDataArchive alloc] initWithReference:self.task.identifier task:self.scheduledTask];
-    [self.taskResultArchiver appendArchive:self.archive withTaskResult:self.result];
+    
+    
+    ORKTaskResult *taskResult = self.result;
+    NSMutableArray *taskResults = [NSMutableArray arrayWithArray:taskResult.results];
+    
+    // Create a new step to add to the task results
+    ORKStepResult *newStepResult = [[ORKStepResult alloc] initWithIdentifier:@"participant.id.step"];
+    NSMutableArray *stepResults = [NSMutableArray arrayWithArray:newStepResult.results];
+    
+    // Add the participant id to the newly created step
+    NSString *participantIdIdentifier = [newStepResult.identifier stringByAppendingString:@"_participantId"];
+    ORKTextQuestionResult *participantIdResult = [[ORKTextQuestionResult alloc] initWithIdentifier:participantIdIdentifier];
+    // Pull the participant id from NSUser defaults
+    NSString *participantId = [[NSUserDefaults standardUserDefaults] stringForKey:@"participantIdKey"];
+    // Set the id to the step result
+    participantIdResult.textAnswer = participantId;
+    [stepResults addObject:participantIdResult];
+    newStepResult.results = [stepResults copy];
+    
+    // Now add the newly created step to the ORKTaskResult results
+    [taskResults addObject:newStepResult];
+    taskResult.results = [taskResults copy];
+    
+    [self.taskResultArchiver appendArchive:self.archive withTaskResult:taskResult];
 }
 
 - (APCSignUpPermissionsType)requiredPermission

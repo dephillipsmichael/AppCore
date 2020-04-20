@@ -81,6 +81,59 @@ NSString *const kFirstTimeRefreshToday = @"FirstTimeRefreshToday";
     }];
 }
 
+- (void) confirmNoQueuedUploads: (void (^)(NSError * error)) completionBlock
+{
+    
+    if (!self.dataSubstrate.currentUser.isConsented) {
+        // Throw error related to consent
+        NSError *notConsentError = [NSError errorWithCode:1
+                                                   domain:@"ConsentFailure"
+                                            failureReason:@"User not consented"
+                                       recoverySuggestion:@"Consent user to study in order to upload."];
+        if (completionBlock) {
+            completionBlock(notConsentError);
+        }
+    } else if (self.batchUploadingInProgress) {
+        // Throw error related to uploads already in progress
+        NSError *currentlyUploadingError = [NSError errorWithCode:100
+                                                           domain:@"Upload In Progress"
+                                                    failureReason:@"Upload already in progress"
+                                               recoverySuggestion:@"Wait for current uploads to finish then try again."];
+        if (completionBlock) {
+            completionBlock(currentlyUploadingError);
+        }
+    } else {
+        // Let's check the # of uploads still to do
+        NSManagedObjectContext * context = self.dataSubstrate.persistentContext;
+        [context performBlock:^{
+            NSFetchRequest * request = [APCResult request];
+            request.predicate = [NSPredicate predicateWithFormat:@"uploaded == nil || uploaded == %@", @(NO)];
+            NSError * error;
+            int unUploadedTotal = 0;
+            NSArray * unUploadedResults = [context executeFetchRequest:request error:&error];
+            for (APCResult * result in unUploadedResults) {
+                if (![result.archiveURL.path containsString:@"unencrypted"]) {
+                    unUploadedTotal++;
+                }
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (completionBlock) {
+                    // check for remaining uploads, if there are hide it in an error (a bit of a hack)
+                    if (unUploadedTotal > 0) {
+                        NSError *uploadsRemainingError = [NSError errorWithCode:-1
+                                                                         domain:@"Uploads Remaining"
+                                                                  failureReason:@"You still need to upload files"
+                                                             recoverySuggestion:@"Upload those files"];
+                        completionBlock(uploadsRemainingError);
+                    } else {
+                        completionBlock(nil);
+                    }
+                }
+            });
+        }];
+    }
+}
+
 - (void) batchUploadDataToBridgeOnCompletion: (void (^)(NSError * error)) completionBlock
 {
     if (self.dataSubstrate.currentUser.isConsented && !self.batchUploadingInProgress) {
@@ -92,9 +145,14 @@ NSString *const kFirstTimeRefreshToday = @"FirstTimeRefreshToday";
             NSError * error;
             NSArray * unUploadedResults = [context executeFetchRequest:request error:&error];
             for (APCResult * result in unUploadedResults) {
-                [result uploadToBridgeOnCompletion:^(NSError *error) {
-                    APCLogError2 (error);
-                }];
+                if ([result.archiveURL.path containsString:@"unencrypted"]) {
+                    // Don't try to upload, it will fail anyway
+                    APCLogDebug(@"Did not try to upload unencrypted file.");
+                } else {
+                    [result uploadToBridgeOnCompletion:^(NSError *error) {
+                        APCLogError2 (error);
+                    }];
+                }
             }
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.batchUploadingInProgress = NO;

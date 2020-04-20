@@ -39,4 +39,5 @@ typedef void (^APCDataMonitorResponseHandler) (NSError *error);
 - (void) refreshFromBridgeOnCompletion: (APCDataMonitorResponseHandler) completionBlock;
 - (void) batchUploadDataToBridgeOnCompletion: (APCDataMonitorResponseHandler) completionBlock;
 - (void) uploadZipFile: (NSString*) path onCompletion: (APCDataMonitorResponseHandler) completionBlock;
+- (void) confirmNoQueuedUploads: (APCDataMonitorResponseHandler) completionBlock;
 @end
